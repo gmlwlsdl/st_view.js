@@ -1,70 +1,72 @@
-// var http = require('http');
-// var port = 8080;
-// console.log(`Start at ${port}`);
-// http.createServer(function (req, res) {
-//     res.writeHead(200, { 'Content-Type': 'text/plain' });
-//     res.end('Hello World!');
-// }).listen(port);
-
-
-// fetch("https://jsonplaceholder.typicode.com/posts/1")
-//     .then((response) => response.json())
-//     .then((data) => console.log(data))
-//     .catch((error) => console.error(error));
-
-
-// async function f(){
-//     const r = await fetch("https://jsonplaceholder.typicode.com/posts", {
-//         method: "POST",
-//         headers: {
-//             "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//             title: "Test",
-//             body: "I am testing!",
-//             userId: 1,
-//         }),
-//     });
-    
-//     data = await r.json();
-//     console.log(data);        
-// }
-
-// f();
-
-// 151.101.16.162 registry.npmjs.org
-// npm 8.5.1
-// node 12.22.9
-// https://stackoverflow.com/questions/48158939/getaddrinfo-eai-again-registry-npmjs-org80
-
-// const {odd, even} = require('./var');
-// console.log(odd);
-// console.log(even);
-
-// const a = require('./func');
-// a();
-
 const http = require('http')
 const fs = require('fs').promises;
+const path = require('path');
+const querystring = require('querystring');
+
+const users = {0:'user1', 1:'user2', 2:'user3'};
+let count = 3;
 
 http.createServer(async (req, res) =>{
-    console.log(req.method);
-    console.log(req.url)
-
-    if(req.url === '/') {
-        const data = await fs.readFile('./index.html');
-        res.writeHead(200, {'Content-Type': 'test.html; charset:utf-8'});
-        res.end(data);
+    if(req.method === "GET"){
+        if(req.url === "/"){
+            const data = await fs.readFile(path.join(__dirname, 'index.html'));
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            return res.end(data);
+        }
+        else if(req.url === "/about"){
+            const data = await fs.readFile(path.join(__dirname, 'about.html'));
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            return res.end(data);
+        }
+        else if(req.url === "/users"){
+            res.writeHead(200, {'Content-Type': 'application/json; charset=utf-8'});
+            return res.end(JSON.stringify(users));
+        }
+        else {
+            try {
+                const data = await fs.readFile(path.join(__dirname, req.url));
+                return res.end(data);
+            } catch (err) {
+                console.error(err);
+                res.writeHead(404);
+                return res.end('Not FOUND');
+            }
+            
+        }
     }
-    else if (req.url === '/about') {
-        const data = await fs.readFile('./about.html');
-        res.writeHead(200, {'Content-Type': 'test.html; charset:utf-8'});
-        res.end(data);
+    else if(req.method === "POST"){
+        if (req.url === '/user') {
+            let postdata = '';
+            req.on('data', (data) => { postdata += data; });
+            return req.on('end', async () => {
+                users[count++] = querystring.parse(postdata).name;
+                console.log(users);
+                res.writeHead(302, {'Location': '/'});
+                return res.end();
+            });
+        }
     }
-    else {
-        const data = await fs.readFile('./err.html');
-        res.writeHead(404, {'Content-Type': 'test.html; charset:utf-8'});
-        res.end();
+    else if(req.method === "PUT"){
+        if(req.url.startsWith('/users/')){
+            const id = req.url.split('/')[2];
+            let postdata = '';
+            req.on('data', (data) => {
+                postdata += data;
+            });
+            return req.on('end', () => {
+                users[id] = querystring.parse(postdata).name;
+                res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+                return res.end(JSON.stringify(users));
+            });
+        }
+    }
+    else if(req.method === "DELETE"){
+        if (req.url.startsWith('/user/')) {
+            const id = req.url.split('/')[2];
+            delete users[id];
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            return res.end(JSON.stringify(users));
+        }            
     }
 }).listen(8080,  () =>{
     console.log('8080 포트 시작!');

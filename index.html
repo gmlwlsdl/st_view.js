@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="ko">
     <head>
-        <title>메인 페이지</title>
-        <meta charset="UTF-8">
+        <title>RESTful SERVER</title>
+        <script src="./javascript.js"></script>
+        <link rel="stylesheet" href="./all.css">
     </head>
-    <body>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/about">About</a>
-        </nav>
-        <div>
-            <h1>메인 페이지</h1>
-        </div>
-    </body>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+    </nav>
+    <div>
+        <h1>메인 페이지</h1>
+        <form id="form" method="post" action="/user">
+            <input type="text" name="name">
+            <input type="submit" value="등록">
+        </form>
+    </div>        
+    <div id="list"></div>    
+    <div><img src="./damgom.jpg"></div>
+</body>
 </html>
