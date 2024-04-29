@@ -47,7 +47,7 @@ http.createServer(async (req, res) =>{
         }
     }
     else if(req.method === "PUT"){
-        if(req.url.startsWith('/users/')){
+        if(req.url.startsWith('/user/')){
             const id = req.url.split('/')[2];
             let postdata = '';
             req.on('data', (data) => {
