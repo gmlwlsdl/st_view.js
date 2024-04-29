@@ -67,5 +67,5 @@ http.createServer(async (req, res) =>{
         res.end();
     }
 }).listen(8080,  () =>{
-    console.log('8080 포트 시작');
+    console.log('8080 포트 시작!');
 })
